@@ -92,7 +92,7 @@ function events.Tick()
         -- Game.GlobalTxt2[50+i] = msg
         -- end
 
-        -- -- Effective HP
+        -- Effective HP
         local monAC_LvL = math.min(100,3*lvl)
         local monster_hit_chance = (5 + monAC_LvL*2)/(10 + monAC_LvL*2 + AC) 
 
@@ -188,18 +188,7 @@ function events.Tick()
     end
     textsupdated = true
 end
-    -- 
 
-
-    -- elseif textsupdated and (Game.CurrentCharScreen ~= 100 or Game.CurrentScreen ~= 7) then
-    --     -- Game.GlobalTxt[87] = StrColor(255, 70, 70, "Fire")
-    --     -- Game.GlobalTxt[6] = StrColor(173, 216, 230, "Air")
-    --     -- Game.GlobalTxt[240] = StrColor(100, 180, 255, "Water")
-    --     -- Game.GlobalTxt[70] = StrColor(153, 76, 0, "Earth")
-    --     -- Game.GlobalTxt[142] = StrColor(200, 200, 255, "Mind")
-    --     -- Game.GlobalTxt[29] = StrColor(255, 192, 203, "Body")
-    --     textsupdated = false
-    -- end
     if Game.CurrentCharScreen == 101 and Game.CurrentScreen == 7 and textsupdated then
         Game.GlobalTxt[138] = 'Magic'
         textsupdated = false

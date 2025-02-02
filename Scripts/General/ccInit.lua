@@ -1,10 +1,9 @@
--- MM7 convenience and combatlog mod settings
+-- MM6 convenience and combatlog mod settings
 
 -- Combat log options
 CombatLogEnabled = 2; -- Combatlog output to file 0: disabled, 1 - Player damage only, 2 - Player and Monster damage
-CombatLogFile = "CombatLog.csv"
+CombatLogTag = "base" -- Log tag, combat log will be cl_[tag].csv, stats export will be stats_[tag].csv, can be changed in-game with ALT-C
 CombatLogSeparator = "\t"  -- combat log fields separator
-StatsOutputFile = "DamageStats.csv"
 MinilogEntriesNumber = 15  -- number of entries for in-game combat log (L)
 
 
@@ -42,9 +41,6 @@ PlayerInventorySortButton  = const.Keys.R -- 'R' - Sort only current inventory
 PartyInventorySortButton   = const.Keys.T -- 'T' - Sort all inventories
 AlchemyPlayerSetButton     = const.Keys.Y -- 'Y' - Select/Unselect player for alchemy stuff
 IdentifyPlayerSetButton    = const.Keys.U -- 'U'  - Select/Unselect player for unidentified stuff
-
-
-F = {}
 
 -- Table of average additional elem damage on weapons vs Bonus2 property value
 const.bonus2damage={}
@@ -98,16 +94,6 @@ Energy = {255, 0, 0},
  }
 
 
-if CombatLogEnabled>0 then
-local file = io.open(CombatLogFile,"r")
-    if not(file) then
-        file = io.open(CombatLogFile,"w")
-        file:write(string.format("Time    %s#%sClass(Lvl)%sPlayer%sDir%sMonster%sDamage%sKind%sSource\n",CombatLogSeparator,CombatLogSeparator,CombatLogSeparator,CombatLogSeparator,CombatLogSeparator,CombatLogSeparator,CombatLogSeparator,CombatLogSeparator))
-        file:close()
-    else 
-        file:close()
-    end
-end
 nextbuffdurationcheck = 0
 nextalarmclockcheck = 0
 
