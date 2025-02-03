@@ -1,18 +1,16 @@
 function events.GameInitialized2()
     schedulenotealreadyadded = false
-    Game.GlobalTxt[144] = StrColor(255, 0, 0,    Game.GlobalTxt[144])
-    Game.GlobalTxt[116] = StrColor(255, 128, 0,  Game.GlobalTxt[116])
-    Game.GlobalTxt[163] = StrColor(0, 127, 255,  Game.GlobalTxt[163])
-    Game.GlobalTxt[75]  = StrColor(0, 255, 0,    Game.GlobalTxt[75])
-    Game.GlobalTxt[1]   = StrColor(250, 250, 0,  Game.GlobalTxt[1] )
-    Game.GlobalTxt[211] = StrColor(160,50, 255,  Game.GlobalTxt[211])
-    Game.GlobalTxt[136] = StrColor(255, 255, 255,Game.GlobalTxt[136])
-    Game.GlobalTxt[108] = StrColor(0, 255, 0,    Game.GlobalTxt[108])
-    Game.GlobalTxt[212] = StrColor(0, 100, 255,  Game.GlobalTxt[212])
-    Game.GlobalTxt[12]  = StrColor(230, 204, 128,Game.GlobalTxt[12])
+    Game.GlobalTxt[144] = StrColor(255, 0, 0, Game.GlobalTxt[144])
+    Game.GlobalTxt[116] = StrColor(255, 128, 0, Game.GlobalTxt[116])
+    Game.GlobalTxt[163] = StrColor(0, 127, 255, Game.GlobalTxt[163])
+    Game.GlobalTxt[75] = StrColor(0, 255, 0, Game.GlobalTxt[75])
+    Game.GlobalTxt[1] = StrColor(250, 250, 0, Game.GlobalTxt[1])
+    Game.GlobalTxt[211] = StrColor(160, 50, 255, Game.GlobalTxt[211])
+    Game.GlobalTxt[136] = StrColor(255, 255, 255, Game.GlobalTxt[136])
+    Game.GlobalTxt[108] = StrColor(0, 255, 0, Game.GlobalTxt[108])
+    Game.GlobalTxt[212] = StrColor(0, 100, 255, Game.GlobalTxt[212])
+    Game.GlobalTxt[12] = StrColor(230, 204, 128, Game.GlobalTxt[12])
 end
-
-
 
 function events.Tick()
     if Game.CurrentCharScreen == 100 and Game.CurrentScreen == 7 then
@@ -21,7 +19,7 @@ function events.Tick()
         local AC = pl:GetArmorClass()
         local fullHP = pl:GetFullHP()
         local HP = pl.HP
-        
+
         local might = pl:GetMight()
         local intel = pl:GetIntellect()
         local pers = pl:GetPersonality()
@@ -56,12 +54,11 @@ function events.Tick()
         local ResistancesPerc = {}
         local R0 = {}
 
-        Resistances[1]   = pl:GetFireResistance() 
-        Resistances[2]   = pl:GetElectricityResistance() 
-        Resistances[3]   = pl:GetColdResistance()
+        Resistances[1] = pl:GetFireResistance()
+        Resistances[2] = pl:GetElectricityResistance()
+        Resistances[3] = pl:GetColdResistance()
         Resistances[4] = pl:GetPoisonResistance()
-        Resistances[5]  = pl:GetMagicResistance()
-
+        Resistances[5] = pl:GetMagicResistance()
 
         for i = 1, 5 do
             if Resistances[i] > 0 then
@@ -69,16 +66,15 @@ function events.Tick()
             else
                 p = 0;
             end
-            ResistancesPerc[i] = 100 - math.round(1000 * (1 - p) + 500 * (1 - p) * p + 250 * (1 - p) * p ^ 2 + 125 * (1 - p) * p ^ 3 + 62.5 * p ^ 4) / 10;
+            ResistancesPerc[i] = 100 - math.round(100 * (1 - p) + 50 * (1 - p) * p + 25 * (1 - p) * p ^ 2 + 12.5 * (1 - p) * p ^ 3 + 6.25 * p ^ 4);
             R0[i] = (1 - p) + .5 * (1 - p) * p + .25 * (1 - p) * p ^ 2 + .125 * (1 - p) * p ^ 3 + .0625 * p ^ 4;
         end
 
-        Game.GlobalTxt[87] = StrColor(255, 70, 70, string.format("Fire\t            %s%%", ResistancesPerc[1]))
-        Game.GlobalTxt[71] = StrColor(173, 216, 230, string.format("Elect\t            %s%s ", ResistancesPerc[2], "%"))
-        Game.GlobalTxt[43] = StrColor(100, 180, 255, string.format("Cold\t            %s%s ", ResistancesPerc[3], "%"))
-        Game.GlobalTxt[166] = StrColor(0, 250, 0, string.format("Poison\t            %s%s ", ResistancesPerc[4], "%"))
-        Game.GlobalTxt[138] = StrColor(160, 50, 255, string.format("Magic\t            %s%s ", ResistancesPerc[5], "%"))
-    
+        Game.GlobalTxt[87] = StrColor(255, 70, 70,   string.format("Fire\t             %s%%", ResistancesPerc[1]))
+        Game.GlobalTxt[71] = StrColor(173, 216, 230, string.format("Elec\t             %s%%", ResistancesPerc[2]))
+        Game.GlobalTxt[43] = StrColor(100, 180, 255, string.format("Cold\t             %s%%", ResistancesPerc[3]))
+        Game.GlobalTxt[166] = StrColor(0, 250, 0,  string.format("Poison\t             %s%%", ResistancesPerc[4]))
+        Game.GlobalTxt[138] = StrColor(160, 50, 255,string.format("Magic\t             %s%%", ResistancesPerc[5]))
 
         -- --Bad things TODO -ma
         -- --Chance that an enemy will succeed in doing some bad thing to you is 30/(30 + LuckEffect + OtherEffect), where OtherEffect depends on that particular thing:
@@ -93,8 +89,8 @@ function events.Tick()
         -- end
 
         -- Effective HP
-        local monAC_LvL = math.min(100,3*lvl)
-        local monster_hit_chance = (5 + monAC_LvL*2)/(10 + monAC_LvL*2 + AC) 
+        local monAC_LvL = math.min(100, 3 * lvl)
+        local monster_hit_chance = (5 + monAC_LvL * 2) / (10 + monAC_LvL * 2 + AC)
 
         local coeff = 1
         
@@ -106,7 +102,7 @@ function events.Tick()
         
 
         -- Attack and DPS calculations	
-        local dmg_m = 0        
+        local dmg_m = 0
         local atk_m = pl:GetMeleeAttack()
         local delay_m = pl:GetAttackDelay()
         local slot = pl.ItemMainHand
@@ -116,20 +112,17 @@ function events.Tick()
         delay_m = delay_m/recoverycoeff
         
 
-
-        local meleerange = pl:GetMeleeDamageRangeText()        
-        local i1 = string.find(meleerange,"-")
-        if i1 then 
-            dmg_m = (string.sub(meleerange,1,i1-1) + string.sub(meleerange,i1+1,-1) )/2 
+        local meleerange = pl:GetMeleeDamageRangeText()
+        local i1 = string.find(meleerange, "-")
+        if i1 then
+            dmg_m = (string.sub(meleerange, 1, i1 - 1) + string.sub(meleerange, i1 + 1, -1)) / 2
         else
             dmg_m = meleerange
-        end 
-        
-        
-        
-        local hitchance_m = (15 + atk_m * 2) / (30 + atk_m * 2 + monAC_LvL)  --monster AC treated equal to Player Lvl
-        --for i = 0,200 do print(i,Game.GlobalTxt2[i]) end
-        
+        end
+
+        local hitchance_m = (15 + atk_m * 2) / (30 + atk_m * 2 + monAC_LvL) -- monster AC treated equal to Player Lvl
+        -- for i = 0,200 do print(i,Game.GlobalTxt2[i]) end
+
         local dmg_r = 0
         local atk_r = pl:GetRangedAttack()
         local delay_r = pl:GetAttackDelay(true)
@@ -176,6 +169,8 @@ function events.Tick()
         Game.GlobalTxt[47] = string.format("M/R DPS: %s/%s\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", StrColor(255, 0, 0, math.round(dps_m * 10) / 10), StrColor(255, 255, 50, math.round(dps_r * 10) / 10))
         Game.GlobalTxt[172] = string.format("Vit:%s Avoid:%s%%\n\n\n\n\n\n\n\n\n\n\n\n\n\n", StrColor(0, 255, 0, vitality),  StrColor(230, 204, 128,math.round(1000*(1-monster_hit_chance))/10))
 
+    Game.GlobalTxt2[2] = PartyRecordsTxt()
+    
     if Keys.IsPressed(const.Keys.ALT) then
         Game.GlobalTxt2[3] = "Full stats since game beginning, [E] for export\n" .. DamageMeterCalculation(vars.damagemeter)
         Game.GlobalTxt2[4] = "Full stats since game beginning, [E] for export\n" .. DamageReceivedCalculation(vars.damagemeter)   
@@ -328,7 +323,6 @@ function pt(tbl)
     print(msg)
 end
 
-
 function ftable(vars)
 	local file = io.open('debugout.txt','a')
 	for k,v in pairs(vars) do
@@ -337,11 +331,6 @@ function ftable(vars)
 	file:write('\n')
 	file:close()
 end
-
-
-
-
-
 
 -- function events.Action(t)
 -- 		Game.ShowStatusText("t.Action" .. t.Action)
@@ -364,13 +353,12 @@ end
 -- for k,v in pairs(tab) do
 -- print(k)
 -- end
---Party[Game.CurrentPlayer].MightBase
---mainhand = Party[Game.CurrentPlayer].Items[Party[Game.CurrentPlayer].ItemMainHand]
+-- Party[Game.CurrentPlayer].MightBase
+-- mainhand = Party[Game.CurrentPlayer].Items[Party[Game.CurrentPlayer].ItemMainHand]
 
+-- for i=0,Game.SpcItemsTxt.High do print(i, Game.SpcItemsTxt[i].NameAdd, Game.SpcItemsTxt[i].Lvl) end
 
---for i=0,Game.SpcItemsTxt.High do print(i, Game.SpcItemsTxt[i].NameAdd, Game.SpcItemsTxt[i].Lvl) end
-
---for i=0,Game.SpcItemsTxt.High do  Game.SpcItemsTxt[i].ChanceForSlot[2] = 0 end Game.SpcItemsTxt[57].ChanceForSlot[2] = 250
+-- for i=0,Game.SpcItemsTxt.High do  Game.SpcItemsTxt[i].ChanceForSlot[2] = 0 end Game.SpcItemsTxt[57].ChanceForSlot[2] = 250
 
 -- 0	of Protection	1
 -- 1	of The Gods	3

@@ -4,7 +4,7 @@
 CombatLogEnabled = 2; -- Combatlog output to file 0: disabled, 1 - Player damage only, 2 - Player and Monster damage
 CombatLogTag = "base" -- Log tag, combat log will be cl_[tag].csv, stats export will be stats_[tag].csv, can be changed in-game with ALT-C
 CombatLogSeparator = "\t"  -- combat log fields separator
-MinilogEntriesNumber = 15  -- number of entries for in-game combat log (L)
+MinilogEntriesNumber = 16  -- number of entries for in-game combat log (L)
 
 
 -- Convenience and Harmless cheats options
@@ -32,7 +32,8 @@ SkillTooltipsEnabled = 1 -- Enhanced skill tooltips. Disarm vs Map Disarm, Merch
 
 
 --Keybinds
-MiniLogButton = const.Keys.H -- MM9-style mini combat log 
+MiniLogButton = const.Keys.H -- MM9-style mini combat log
+ID_MonsterButton = const.Keys.G -- MM6 ID monster Grandmastery
 -- CharacterInfo Screen
 DamageMeterResetButton  = const.Keys.R -- 'R' button on the Char info screen to Reset segment statistics data
 DamageMeterExportButton = const.Keys.E -- 'E' button on the Char info screen to Export statistics data
@@ -96,7 +97,7 @@ Energy = {255, 0, 0},
 
 nextbuffdurationcheck = 0
 nextalarmclockcheck = 0
-
+concat_damage = 0
 -- need to add after GlobalTxt to structs lua
 --[mmv(0x56B7E8, 0x5C88F0, 0x5E4CB0)].array(55).EditPChar  'GlobalTxt2' 
 

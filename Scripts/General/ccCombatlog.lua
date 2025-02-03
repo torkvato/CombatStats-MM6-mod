@@ -45,7 +45,7 @@ function events.KeyDown(t)
                     vars.damagemeter1[i].Damage_Kind[id] =  0                    
                 end
             end
-            vars.Max1 = {Melee = {Dmg = 0, Player = 0}, Ranged = {Dmg = 0, Player = 0}, Spell = {Dmg = 0, Player = 0}} 
+            vars.Max1 = {Melee = {Dmg = 0, Player = 0, Msg = ""}, Ranged = {Dmg = 0, Player = 0, Msg = ""}, Spell = {Dmg = 0, Player = 0, Msg = ""}} 
         end
         if t.Key == const.Keys.Y and (data_export_confirmation == 1) then -- "y" key
 			Game.ShowStatusText(string.format("Exporting stats data to file: %s",vars.StatsOutputFile))
@@ -82,9 +82,9 @@ function events.CalcDamageToMonster(t)
 
         if data and data.Player then
 
-            i = data.Player:GetIndex()
+            local i = data.Player:GetIndex()
 
-            monName = Game.MonstersTxt[t.Monster.Id].Name
+            local monName = Game.MonstersTxt[t.Monster.Id].Name
             monName = string.format("%s(%s)",monName,t.Monster.Level)
             -- DPS is calculated as total damage done, divided by total active time in real seconds
             -- In-game time: 2 real seconds equal 1 in-game minute, 1 real second = 30 in-game seconds
@@ -149,12 +149,12 @@ function events.CalcDamageToMonster(t)
                 end 
                 
             end
-
-            -- Concatenate damage of different kinds with same timestamps
-            local concatDmg=t.Result
-			if timedelta==0 and (monName==vars.minilog[MinilogEntriesNumber].Mob) and (data.Player.Name==vars.minilog[MinilogEntriesNumber].Player) then	
-				concatDmg = concatDmg + vars.minilog[MinilogEntriesNumber].Damage			
-			end
+            -- Maximal hits:concatenate damage of different kinds with same timestamps and same player, ignore blasters            
+            if timedelta==0 and  (data.Player.Name==vars.minilog[MinilogEntriesNumber].Player) and vars.minilog[MinilogEntriesNumber].Kind~='Energy' then	
+				concatDmg = concatDmg + t.Result
+            else
+                concatDmg = t.Result			
+	    end
 
             -- Update damage
             vars.damagemeter[i].Damage = vars.damagemeter[i].Damage + t.Result
@@ -165,37 +165,36 @@ function events.CalcDamageToMonster(t)
                 vars.damagemeter[i].Damage_Melee = vars.damagemeter[i].Damage_Melee + t.Result
                 vars.damagemeter1[i].Damage_Melee = vars.damagemeter1[i].Damage_Melee + t.Result
                 mapvars.damagemeter[i].Damage_Melee = mapvars.damagemeter[i].Damage_Melee + t.Result
-                CheckMax(concatDmg,i,1)
+                
             elseif data.Spell==100 or data.Spell==102 then
                 vars.damagemeter[i].Damage_Ranged = vars.damagemeter[i].Damage_Ranged + t.Result
                 vars.damagemeter1[i].Damage_Ranged = vars.damagemeter1[i].Damage_Ranged + t.Result
                 mapvars.damagemeter[i].Damage_Ranged = mapvars.damagemeter[i].Damage_Ranged + t.Result
-                CheckMax(concatDmg,i,2)
+                
             else
                 vars.damagemeter[i].Damage_Spell = vars.damagemeter[i].Damage_Spell + t.Result
                 vars.damagemeter1[i].Damage_Spell = vars.damagemeter1[i].Damage_Spell + t.Result
-                mapvars.damagemeter[i].Damage_Spell = mapvars.damagemeter[i].Damage_Spell + t.Result
-                CheckMax(concatDmg,i,3)
+                mapvars.damagemeter[i].Damage_Spell = mapvars.damagemeter[i].Damage_Spell + t.Result                
             end
 
-            objmsg = DamageTypeParsing(data)
+            local objmsg = DamageTypeParsing(data)
 
 			-- minilog update
 			table.move(vars.minilog,1,#vars.minilog,1,vars.minilog)
 			vars.minilog[MinilogEntriesNumber] = {Player = data.Player.Name, Hit = objmsg, Mob = monName, Damage = t.Result, Kind = get_key_for_value(const.Damage, t.DamageKind), Type = 0 }
             
-            
-            
+            CheckMax(concatDmg,i)
+                       
             if t.Result>=t.Monster.HP then
                 objmsg = objmsg .. CombatLogSeparator .. "killed"
             end
 
             if CombatLogEnabled>0 then
                 local z = CombatLogSeparator
-                playerid = string.format("%s%s%s(%s)%s%s", i, z, Game.ClassNames[data.Player.Class], data.Player:GetLevel(), z, data.Player.Name)
+                local playerid = string.format("%s%s%s(%s)%s%s", i, z, Game.ClassNames[data.Player.Class], data.Player:GetLevel(), z, data.Player.Name)
                 -- Timestamp #Player Name(Lvl) TargetName Damage DamageKind DamageSource
                 local msg = string.format("%s%s%s%s%s%s%s%s%s%s%s%s%s\n", Game.Time, z, playerid,  z,">>",z, monName, z, t.Result, z, get_key_for_value(const.Damage, t.DamageKind),z, objmsg)
-                file = io.open(vars.CombatLogFile, "a")
+                local file = io.open(vars.CombatLogFile, "a")
                 file:write(msg)
                 file:close()
             end
@@ -214,18 +213,17 @@ function events.CalcDamageToPlayer(t)
             -- t.Object and t.ObjectIndex are set if player is hit by a missile.
             -- t.Spell, t.SpellSkill and t.SpellMastery are set if a spell is being used.
             -- Note that t.Object and t.Monster can be set at the same time if the projectile was fired by a monster. 
-
+            local monName
 			if data.Monster then
 				monName = Game.MonstersTxt[data.Monster.Id].Name
-				monName = string.format("%s(%s)",monName,data.Monster.Level)
+				monName = string.format("%s(%s)",monName,data.Monster.Level)                
 			elseif data.Player then
 				monName = data.Player.Name
 			else
 				monName = "???"
 			end
 			
-            objmsg = DamageTypeParsing(data)
-			
+            local objmsg = DamageTypeParsing(data)            
 			-- minilog update
 			table.move(vars.minilog,1,#vars.minilog,1,vars.minilog)
 			vars.minilog[MinilogEntriesNumber] = {Player = monName, Hit = objmsg, Mob = t.Player.Name, Damage = t.Result, Kind = get_key_for_value(const.Damage, t.DamageKind), Type = 1 }
@@ -244,10 +242,10 @@ function events.CalcDamageToPlayer(t)
 
             if CombatLogEnabled==2 then
                 local z = CombatLogSeparator
-                playerid = string.format("%s%s%s(%s)%s%s", t.PlayerIndex, z, Game.ClassNames[t.Player.Class], t.Player:GetLevel(), z, t.Player.Name)
+                local playerid = string.format("%s%s%s(%s)%s%s", t.PlayerIndex, z, Game.ClassNames[t.Player.Class], t.Player:GetLevel(), z, t.Player.Name)
                 -- Timestamp #Player Name(Lvl) TargetName Damage DamageKind DamageSource
                 local msg = string.format("%s%s%s%s%s%s%s%s%s%s%s%s%s\n", Game.Time, z, playerid,  z, "<<",z,monName, z, t.Result, z, get_key_for_value(const.Damage, t.DamageKind),z, objmsg)
-                file = io.open(vars.CombatLogFile, "a")
+                local file = io.open(vars.CombatLogFile, "a")
                 file:write(msg)
                 file:close()
             end
@@ -395,40 +393,49 @@ function DamageTypeParsing(O)
     return objmsg
 end
 
-function CheckMax(concatDmg,i,mrs)
-    if mrs==1 then --melee
-        if concatDmg>vars.Max.Melee.Dmg then vars.Max.Melee.Dmg = concatDmg vars.Max.Melee.Player = i end
-        if concatDmg>vars.Max1.Melee.Dmg then vars.Max1.Melee.Dmg = concatDmg vars.Max1.Melee.Player = i end
-        if concatDmg>mapvars.Max.Melee.Dmg then mapvars.Max.Melee.Dmg = concatDmg mapvars.Max.Melee.Player = i end        
-    elseif mrs==2 then --ranged
-        if concatDmg>vars.Max.Ranged.Dmg then vars.Max.Ranged.Dmg = concatDmg vars.Max.Ranged.Player = i end
-        if concatDmg>vars.Max1.Ranged.Dmg then vars.Max1.Ranged.Dmg = concatDmg vars.Max1.Ranged.Player = i end
-        if concatDmg>mapvars.Max.Ranged.Dmg then mapvars.Max.Ranged.Dmg = concatDmg mapvars.Max.Ranged.Player = i end
+function CheckMax(concatDmg,i)
+    local msg = ""    
+    if vars.minilog[MinilogEntriesNumber].Hit=='hits' then --melee        
+        local slot = Party[i].ItemMainHand
+        local it0 = (slot ~= 0 and Party[i].Items[slot])
+        if it0 then msg = it0:GetName() end
+        --if it0 then msg = string.gsub(it0:GetName(), "%s+", "") end
+        local slot = Party[i].ItemExtraHand
+        local it1 = (slot ~= 0 and Party[i].Items[slot])
+        if it1 then msg = msg .. '+'.. it1:GetName() end
+        
+        if concatDmg>vars.Max.Melee.Dmg then vars.Max.Melee.Dmg = concatDmg vars.Max.Melee.Player = i vars.Max.Melee.Msg = msg end
+        if concatDmg>vars.Max1.Melee.Dmg then vars.Max1.Melee.Dmg = concatDmg vars.Max1.Melee.Player = i vars.Max1.Melee.Msg = msg end
+        if concatDmg>mapvars.Max.Melee.Dmg then mapvars.Max.Melee.Dmg = concatDmg mapvars.Max.Melee.Player = i mapvars.Max.Melee.Msg = msg end        
+    elseif vars.minilog[MinilogEntriesNumber].Hit=='shoots' then --ranged
+        local slot = Party[i].ItemBow
+        local it2 = (slot ~= 0 and Party[i].Items[slot])
+        if it2 then msg = it2:GetName() end
+        if concatDmg>vars.Max.Ranged.Dmg then vars.Max.Ranged.Dmg = concatDmg vars.Max.Ranged.Player = i vars.Max.Ranged.Msg = msg end
+        if concatDmg>vars.Max1.Ranged.Dmg then vars.Max1.Ranged.Dmg = concatDmg vars.Max1.Ranged.Player = i vars.Max1.Ranged.Msg = msg end
+        if concatDmg>mapvars.Max.Ranged.Dmg then mapvars.Max.Ranged.Dmg = concatDmg mapvars.Max.Ranged.Player = i mapvars.Max.Ranged.Msg = msg end
     else --spell
-        if concatDmg>vars.Max.Spell.Dmg then vars.Max.Spell.Dmg = concatDmg vars.Max.Spell.Player = i end
-        if concatDmg>vars.Max1.Spell.Dmg then vars.Max1.Spell.Dmg = concatDmg vars.Max1.Spell.Player = i end
-        if concatDmg>mapvars.Max.Spell.Dmg then mapvars.Max.Spell.Dmg = concatDmg mapvars.Max.Spell.Player = i end
+        if concatDmg>vars.Max.Spell.Dmg then vars.Max.Spell.Dmg = concatDmg vars.Max.Spell.Player = i vars.Max.Spell.Msg = vars.minilog[MinilogEntriesNumber].Hit end
+        if concatDmg>vars.Max1.Spell.Dmg then vars.Max1.Spell.Dmg = concatDmg vars.Max1.Spell.Player = i vars.Max1.Spell.Msg = vars.minilog[MinilogEntriesNumber].Hit end
+        if concatDmg>mapvars.Max.Spell.Dmg then mapvars.Max.Spell.Dmg = concatDmg mapvars.Max.Spell.Player = i mapvars.Max.Spell.Msg = vars.minilog[MinilogEntriesNumber].Hit end
     end
 end    
 
 
 function PartyRecordsTxt()
-    local msg=StrColor(255, 100,100, "Record damage")
-    msg = msg..StrColor(50, 255, 255,string.format("\nData\t%10sMelee\t%27sRanged\t%44sSpell",'|','|','|'))
-    msg = msg .. string.format("\nMap \t%10s%s %s\t%27s%s %s\t%44s%s %s",'|',Party[mapvars.Max.Melee.Player].Name,mapvars.Max.Melee.Dmg,'|', Party[mapvars.Max.Ranged.Player].Name,mapvars.Max.Ranged.Dmg, '|', Party[mapvars.Max.Spell.Player].Name,mapvars.Max.Spell.Dmg)
-    msg = msg .. string.format("\nSegm\t%10s%s %s\t%27s%s %s\t%44s%s %s",'|',Party[vars.Max1.Melee.Player].Name,vars.Max1.Melee.Dmg,'|', Party[vars.Max1.Ranged.Player].Name,vars.Max1.Ranged.Dmg, '|', Party[vars.Max1.Spell.Player].Name,vars.Max1.Spell.Dmg)
-        msg = msg .. string.format("\nFull\t%10s%s %s\t%27s%s %s\t%44s%s %s",'|',Party[vars.Max.Melee.Player].Name,vars.Max.Melee.Dmg,'|', Party[vars.Max.Ranged.Player].Name,vars.Max.Ranged.Dmg, '|', Party[vars.Max.Spell.Player].Name,vars.Max.Spell.Dmg)
-
-    local tsegm = vars.damagemeter1[0].Damage_Received + vars.damagemeter1[1].Damage_Received + vars.damagemeter1[2].Damage_Received + vars.damagemeter1[3].Damage_Received
-    local tmap  = mapvars.damagemeter[0].Damage_Received + mapvars.damagemeter[1].Damage_Received + mapvars.damagemeter[2].Damage_Received + mapvars.damagemeter[3].Damage_Received
-    local tfull = vars.damagemeter[0].Damage_Received + vars.damagemeter[1].Damage_Received + vars.damagemeter[2].Damage_Received + vars.damagemeter[3].Damage_Received
-    
-    msg = msg .. StrColor(255, 100,100, "\n\nDamage taken, Party %%")
-    msg = msg..StrColor(50, 255, 255,string.format("\nData\t%10s%-9.9s\t%24s%-9.9s\t%37s%-9.9s\t%50s%-9.9s",'|',Game.ClassNames[Party[0].Class],'|',Game.ClassNames[Party[1].Class], '|',Game.ClassNames[Party[2].Class], '|',Game.ClassNames[Party[3].Class]))
-    msg = msg..string.format("\nMap \t%10s%5s%%\t%24s%5s%%\t%37s%5s%%\t%50s%5s%%",'|',math.round(100*mapvars.damagemeter[0].Damage_Received/tmap),'|',math.round(100*mapvars.damagemeter[1].Damage_Received/tmap), '|',math.round(100*mapvars.damagemeter[2].Damage_Received/tmap), '|',math.round(100*mapvars.damagemeter[3].Damage_Received/tmap))
-    msg = msg..string.format("\nSegm\t%10s%5s%%\t%24s%5s%%\t%37s%5s%%\t%50s%5s%%",'|',math.round(100*vars.damagemeter1[0].Damage_Received/tsegm),'|',math.round(100*vars.damagemeter1[1].Damage_Received/tsegm), '|',math.round(100*vars.damagemeter1[2].Damage_Received/tsegm), '|',math.round(100*vars.damagemeter1[3].Damage_Received/tsegm))
-    msg = msg..string.format("\nFull\t%10s%5s%%\t%24s%5s%%\t%37s%5s%%\t%50s%5s%%",'|',math.round(100*vars.damagemeter[0].Damage_Received/tfull),'|',math.round(100*vars.damagemeter[1].Damage_Received/tfull), '|',math.round(100*vars.damagemeter[2].Damage_Received/tfull), '|',math.round(100*vars.damagemeter[3].Damage_Received/tfull))
-
+    local msg=StrColor(255, 100,100, "Record damage\n")
+    msg = msg.. StrColor(230,230,0,string.format("Map: %s\n", Game.MapStats[Game.Map.MapStatsIndex].Name))  
+    msg = msg.. string.format("M: %s %s %s\n", mapvars.Max.Melee.Dmg, Party[mapvars.Max.Melee.Player].Name, mapvars.Max.Melee.Msg )  
+    msg = msg.. string.format("R: %s %s %s\n", mapvars.Max.Ranged.Dmg, Party[mapvars.Max.Ranged.Player].Name, mapvars.Max.Ranged.Msg )  
+    msg = msg.. string.format("S: %s %s %s\n", mapvars.Max.Spell.Dmg, Party[mapvars.Max.Spell.Player].Name, mapvars.Max.Spell.Msg )  
+    msg = msg.. StrColor(230,230,0,string.format("\nSegment: %s\n", GameTimePassed()))  
+    msg = msg.. string.format("M: %s %s %s\n", vars.Max1.Melee.Dmg, Party[vars.Max1.Melee.Player].Name, vars.Max1.Melee.Msg )  
+    msg = msg.. string.format("R: %s %s %s\n", vars.Max1.Ranged.Dmg, Party[vars.Max1.Ranged.Player].Name, vars.Max1.Ranged.Msg )  
+    msg = msg.. string.format("S: %s %s %s\n", vars.Max1.Spell.Dmg, Party[vars.Max1.Spell.Player].Name, vars.Max1.Spell.Msg )  
+    msg = msg.. StrColor(230,230,0,string.format("\nFull stats\n"))  
+    msg = msg.. string.format("M: %s %s %s\n", vars.Max.Melee.Dmg, Party[vars.Max.Melee.Player].Name, vars.Max.Melee.Msg )  
+    msg = msg.. string.format("R: %s %s %s\n", vars.Max.Ranged.Dmg, Party[vars.Max.Ranged.Player].Name, vars.Max.Ranged.Msg )  
+    msg = msg.. string.format("S: %s %s %s\n", vars.Max.Spell.Dmg, Party[vars.Max.Spell.Player].Name, vars.Max.Spell.Msg )  
     return msg
 end
 
@@ -477,9 +484,9 @@ function events.LoadMap()
 	vars.damagemeter1 = vars.damagemeter1 or {} -- current segment stats
     mapvars.damagemeter = mapvars.damagemeter or {} -- current map stats
     
-	vars.Max = vars.Max or {Melee = {Dmg = 0, Player = 0}, Ranged = {Dmg = 0, Player = 0}, Spell = {Dmg = 0, Player = 0}} -- max dmg per hit overall
-    vars.Max1 = vars.Max1 or {Melee = {Dmg = 0, Player = 0}, Ranged = {Dmg = 0, Player = 0}, Spell = {Dmg = 0, Player = 0}} -- max dmg per hit overall
-    mapvars.Max = mapvars.Max or {Melee = {Dmg = 0, Player = 0}, Ranged = {Dmg = 0, Player = 0}, Spell = {Dmg = 0, Player = 0}} -- max dmg per hit overall
+	vars.Max = vars.Max or {Melee = {Dmg = 0, Player = 0, Msg = ""}, Ranged = {Dmg = 0, Player = 0, Msg = ""}, Spell = {Dmg = 0, Player = 0, Msg = ""}} 
+    vars.Max1 = vars.Max1 or {Melee = {Dmg = 0, Player = 0, Msg = ""}, Ranged = {Dmg = 0, Player = 0, Msg = ""}, Spell = {Dmg = 0, Player = 0, Msg = ""}} 
+    mapvars.Max = mapvars.Max or {Melee = {Dmg = 0, Player = 0, Msg = ""}, Ranged = {Dmg = 0, Player = 0, Msg = ""}, Spell = {Dmg = 0, Player = 0, Msg = ""}} 
 
     vars.timestamps = vars.timestamps or {} -- last actions timestamps
 	
