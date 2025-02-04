@@ -46,6 +46,9 @@ https://github.com/torkvato/CombatStats-MM7-mod
  
 Вместо двух последний шагов можно просто скачать и распаковать архив с последней стабильной версией\
 **https://drive.google.com/file/d/1yRj2peaB4j_ivjNlXg6bh_HiaIoaT7bV**
+
+
+
 ![image](https://github.com/user-attachments/assets/3c1cb510-a778-418b-8355-1b6ff9d485d9)
 
 
