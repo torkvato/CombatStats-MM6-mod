@@ -16,6 +16,7 @@ https://github.com/torkvato/CombatStats-MM7-mod
     -  Colored for ease of use
 - **In-game damage statistics processing**
     - Accumulation of the damage data such as total damage dealt and received and average [observed] DPS for melee/ranged/magic
+    - Hit records for melee/ranged/magic
     - In-game tables for party members efficiency comparison
     - Selected segment / current map / overall game data in separate tables
     - Export of the statistics to the output file for future reference
@@ -24,13 +25,14 @@ https://github.com/torkvato/CombatStats-MM7-mod
     - Elements-Colored Resistances with average resistance percentage and "bad things" chances
     - Final Melee and Ranged damage metric in the form of thoroughly [calculated] DPS, for best weapon combination selection
     - Effective health ("Vitality"), employing HP, Armor Class (physical avoidance) and Magic resistances in single metric
-    - Skill tooltips, like total Merchant discount or current Disarm skill vs. area difficulty [Optional]   
+    - Skill tooltips, like total Merchant discount or current Disarm skill vs. area difficulty [Optional]
+    - Average Spell damage, damage per mana and DPS stats based on the current player skills   
 - **Convenience features**	
     - Automatic items sorting. Borrowed from MAW MMMerge mod, with minor changes (alchemy/unidentified items sorting). 
     - Full Travel Schedule / World map / Teachers / Alchemy Recipes table in Autonotes (Seer tab) [Optional]	
     - Sharing max ID Item skill party [Optional]
     - Sharing Repair skill or even automatic repair with sufficient skill [Optional]
-    - Grandmaster ID Monster info with ALT pressed [Optional]
+    - MM7-alike Grandmaster ID Monster  [Optional]
     - Buff expiration alert (No more weakness from missed Haste) [Optional]
     - Alarm clock 
 
