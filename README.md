@@ -46,3 +46,9 @@ https://github.com/torkvato/CombatStats-MM7-mod
 Instead of two last steps, one can download whole package with last stable release\
 **https://drive.google.com/file/d/1yRj2peaB4j_ivjNlXg6bh_HiaIoaT7bV**
 
+Som illustrations:
+
+![image](https://github.com/user-attachments/assets/3c1cb510-a778-418b-8355-1b6ff9d485d9)
+
+
+![image](https://github.com/user-attachments/assets/940d79a6-583b-41a3-a492-8177e075e459)
